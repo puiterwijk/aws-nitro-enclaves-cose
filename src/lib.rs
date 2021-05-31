@@ -9,9 +9,11 @@
 //!
 //! Currently only COSE Sign1 is implemented.
 
+pub mod encrypt;
 pub mod error;
-pub mod sign;
 pub mod header_map;
+pub mod sign;
 
+pub use crate::encrypt::COSEEncrypt0;
 #[doc(inline)]
 pub use crate::sign::COSESign1;
