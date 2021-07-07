@@ -6,6 +6,8 @@ use crate::{error::COSEError, sign::SignatureAlgorithm};
 
 #[cfg(feature = "key_openssl_pkey")]
 mod openssl_pkey;
+#[cfg(feature = "key_tpm")]
+pub mod tpm;
 
 /// A public key that can verify an existing signature
 pub trait SigningPublicKey {
