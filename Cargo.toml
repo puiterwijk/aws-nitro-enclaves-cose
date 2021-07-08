@@ -16,6 +16,8 @@ serde_bytes = "0.11"
 serde_with = "1.5"
 openssl = "0.10"
 tss-esapi = { version = "5.1", optional = true }
+aws-sdk-kms = { git = "https://github.com/awslabs/aws-sdk-rust", branch = "main", package = "aws-sdk-kms", optional = true }
+tokio = { version = "1.8", features = ["rt"], optional = true }
 
 [dependencies.serde]
 version = "1.0"
@@ -25,3 +27,7 @@ features = ["derive"]
 default = ["key_openssl_pkey"]
 key_openssl_pkey = []
 key_tpm = ["tss-esapi"]
+key_kms = ["aws-sdk-kms", "tokio"]
+
+[dev-dependencies]
+tokio = { version = "1.8", features = ["macros"] }

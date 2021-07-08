@@ -4,6 +4,8 @@ use openssl::{hash::MessageDigest, nid::Nid};
 
 use crate::{error::COSEError, sign::SignatureAlgorithm};
 
+#[cfg(feature = "key_kms")]
+pub mod kms;
 #[cfg(feature = "key_openssl_pkey")]
 mod openssl_pkey;
 #[cfg(feature = "key_tpm")]
@@ -25,22 +27,26 @@ pub trait SigningPublicKey {
 pub fn ec_curve_to_parameters(
     curve_name: Nid,
 ) -> Result<(SignatureAlgorithm, MessageDigest, usize), COSEError> {
-    match curve_name {
+    let sig_alg = match curve_name {
         // Recommended to use with SHA256
-        Nid::X9_62_PRIME256V1 => Ok((SignatureAlgorithm::ES256, MessageDigest::sha256(), 32)),
+        Nid::X9_62_PRIME256V1 => SignatureAlgorithm::ES256,
         // Recommended to use with SHA384
-        Nid::SECP384R1 => Ok((SignatureAlgorithm::ES384, MessageDigest::sha384(), 48)),
+        Nid::SECP384R1 => SignatureAlgorithm::ES384,
         // Recommended to use with SHA512
-        Nid::SECP521R1 => Ok((
-            SignatureAlgorithm::ES512,
-            MessageDigest::sha512(),
-            66, /* Not a typo */
-        )),
-        _ => Err(COSEError::UnsupportedError(format!(
-            "Curve name {:?} is not supported",
-            curve_name
-        ))),
-    }
+        Nid::SECP521R1 => SignatureAlgorithm::ES512,
+        _ => {
+            return Err(COSEError::UnsupportedError(format!(
+                "Curve name {:?} is not supported",
+                curve_name
+            )))
+        }
+    };
+
+    Ok((
+        sig_alg,
+        sig_alg.suggested_message_digest(),
+        sig_alg.key_length(),
+    ))
 }
 
 /// A private key that can produce new signatures
